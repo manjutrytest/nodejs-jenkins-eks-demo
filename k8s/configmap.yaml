@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nodejs-app-config
+data:
+  APP_NAME: "nodejs-eks-app"
+  LOG_LEVEL: "info"

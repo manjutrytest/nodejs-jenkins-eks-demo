@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: EKS Cluster
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: nodejs-eks
+
+Resources:
+  EKSClusterRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${EnvironmentName}-cluster-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: eks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+
+  EKSCluster:
+    Type: AWS::EKS::Cluster
+    Properties:
+      Name: !Sub ${EnvironmentName}-cluster
+      Version: '1.28'
+      RoleArn: !GetAtt EKSClusterRole.Arn
+      ResourcesVpcConfig:
+        SubnetIds:
+          - Fn::ImportValue: !Sub ${EnvironmentName}-PublicSubnet1
+          - Fn::ImportValue: !Sub ${EnvironmentName}-PublicSubnet2
+        EndpointPublicAccess: true
+        EndpointPrivateAccess: false
+
+Outputs:
+  ClusterName:
+    Value: !Ref EKSCluster
+    Export:
+      Name: !Sub ${EnvironmentName}-ClusterName
+
+  ClusterEndpoint:
+    Value: !GetAtt EKSCluster.Endpoint
+    Export:
+      Name: !Sub ${EnvironmentName}-ClusterEndpoint
