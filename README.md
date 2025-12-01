@@ -1,119 +1,248 @@
-# Node.js CI/CD with Jenkins, Docker, ECR & EKS
+# Node.js EKS CI/CD Pipeline with Jenkins
 
-Production-ready CI/CD pipeline deploying Node.js applications to AWS EKS (Kubernetes) using Jenkins.
+Production-ready CI/CD pipeline for deploying Node.js applications to Amazon EKS using Jenkins, Docker, and ECR.
 
-## 🚀 What's Different from ECS?
+## 🎯 Overview
 
-**ECS (Previous Project):**
-- AWS-specific container orchestration
-- Simpler, managed service
-- Good for straightforward deployments
+This repository contains a complete, automated CI/CD pipeline that:
+- Builds Docker images on every code push
+- Pushes images to Amazon ECR
+- Deploys to Amazon EKS with zero downtime
+- Uses Jenkins for automation
+- Includes all infrastructure as code
 
-**EKS (This Project):**
-- Full Kubernetes (K8s) platform
-- Industry-standard orchestration
-- More features: ConfigMaps, Secrets, StatefulSets, DaemonSets
-- Better for complex microservices
-- Multi-cloud portable
-
-## 📋 Architecture
+## 🏗️ Architecture
 
 ```
-GitHub → Jenkins (EC2) → Docker Build → ECR → 
-EKS Cluster → Kubernetes Deployment → Service → ALB
+GitHub → Jenkins → Docker → ECR → EKS → Load Balancer
 ```
 
 **Components:**
-- Jenkins CI/CD server on EC2
-- Docker containerization
-- Amazon ECR for image registry
-- EKS cluster with managed node groups
-- Kubernetes deployments and services
-- AWS Load Balancer Controller
-- CloudWatch for logging
-
-## ⚡ Quick Start
-
-```bash
-# Clone repository
-git clone https://github.com/YOUR_USERNAME/nodejs-jenkins-eks-demo.git
-cd nodejs-jenkins-eks-demo
-
-# Configure AWS
-aws configure
-
-# Deploy infrastructure (20-25 minutes)
-chmod +x scripts/deploy-all.sh
-./scripts/deploy-all.sh
-
-# Access application
-kubectl get svc nodejs-app-service
-```
+- **Application**: Node.js Express API
+- **Container Registry**: Amazon ECR
+- **Orchestration**: Amazon EKS (Kubernetes)
+- **CI/CD**: Jenkins on EC2
+- **Infrastructure**: AWS CloudFormation
 
 ## 📁 Project Structure
 
 ```
 nodejs-jenkins-eks-demo/
 ├── app/                          # Node.js application
+│   ├── server.js                 # Express server
+│   ├── package.json              # Dependencies
+│   └── Dockerfile                # Container image
 ├── k8s/                          # Kubernetes manifests
-│   ├── deployment.yaml           # K8s deployment
-│   ├── service.yaml              # K8s service (LoadBalancer)
+│   ├── deployment.yaml           # App deployment (3 replicas)
+│   ├── service.yaml              # Load balancer service
 │   └── configmap.yaml            # Configuration
-├── jenkins/
-│   └── Jenkinsfile               # CI/CD pipeline
+├── jenkins/                      # CI/CD pipeline
+│   └── Jenkinsfile               # Pipeline definition
 ├── infra/                        # CloudFormation templates
-│   ├── 01-vpc.yml                # VPC for EKS
-│   ├── 02-eks-cluster.yml        # EKS control plane
+│   ├── 01-vpc.yml                # VPC and networking
+│   ├── 02-eks-cluster.yml        # EKS cluster
 │   ├── 03-eks-nodegroup.yml      # Worker nodes
-│   ├── 04-jenkins.yml            # Jenkins server
-│   └── 05-ecr.yml                # ECR repository
-└── scripts/
-    ├── deploy-all.sh             # Deploy everything
-    ├── setup-kubectl.sh          # Configure kubectl
-    └── cleanup.sh                # Remove all resources
+│   ├── 04-ecr.yml                # Container registry
+│   └── 05-jenkins-standalone.yml # Jenkins server
+├── scripts/                      # Deployment scripts
+│   └── deploy-all.ps1            # One-command deployment
+├── DEPLOYMENT-GUIDE.md           # Complete setup guide
+├── ARCHITECTURE.md               # Architecture details
+└── COMMANDS-CHEATSHEET.md        # Quick reference
 ```
 
-## 🎯 Features
+## 🚀 Quick Start for Your Team
 
-- ✅ Full Kubernetes orchestration
-- ✅ Auto-scaling (HPA & Cluster Autoscaler)
-- ✅ Rolling updates with health checks
-- ✅ ConfigMaps and Secrets management
-- ✅ Service discovery
-- ✅ Ingress/LoadBalancer support
-- ✅ Persistent volumes
-- ✅ Namespace isolation
+### Prerequisites
 
-## 💰 Cost Estimate
+- AWS CLI configured with credentials
+- kubectl installed
+- eksctl installed
+- Git installed
+- AWS account with appropriate permissions
 
-Running 24/7 in eu-north-1:
-- EKS Control Plane: ~$73/month
-- EC2 Worker Nodes (2x t3.medium): ~$60/month
-- Jenkins EC2 (t3.medium): ~$30/month
-- ALB: ~$20/month
-- ECR + Data transfer: ~$6/month
-- **Total: ~$189/month**
+### Clone and Deploy
 
-Note: EKS is more expensive than ECS due to control plane costs
+```bash
+# Clone the repository
+git clone https://github.com/YOUR_USERNAME/nodejs-jenkins-eks-demo.git
+cd nodejs-jenkins-eks-demo
+
+# Deploy infrastructure (PowerShell)
+.\scripts\deploy-all.ps1
+
+# Or deploy manually (see DEPLOYMENT-GUIDE.md)
+```
+
+### Complete Setup (30 minutes)
+
+1. **Deploy Infrastructure** - Run deployment script
+2. **Configure Jenkins** - Access Jenkins UI and install plugins
+3. **Setup GitHub Webhook** - Enable automatic builds
+4. **Create Pipeline** - Configure Jenkins pipeline job
+5. **Deploy Application** - First build and deployment
+
+**See `DEPLOYMENT-GUIDE.md` for detailed step-by-step instructions.**
+
+## ✨ Features
+
+- ✅ **Automated CI/CD** - Push code, auto-deploy
+- ✅ **Zero Downtime** - Rolling updates
+- ✅ **Scalable** - Kubernetes orchestration
+- ✅ **Production Ready** - Health checks, monitoring
+- ✅ **Infrastructure as Code** - CloudFormation templates
+- ✅ **Load Balanced** - AWS ELB integration
 
 ## 📚 Documentation
 
-- **[Quick Start](QUICKSTART.md)** - Get started quickly
-- **[Deployment Guide](DEPLOYMENT-GUIDE.md)** - Complete setup
-- **[Kubernetes Guide](K8S-GUIDE.md)** - K8s concepts
-- **[Architecture](ARCHITECTURE.md)** - System design
+| Document | Description |
+|----------|-------------|
+| **DEPLOYMENT-GUIDE.md** | Complete deployment instructions |
+| **ARCHITECTURE.md** | System architecture and design |
+| **COMMANDS-CHEATSHEET.md** | Quick command reference |
 
-## 🔧 Technology Stack
+## 🔧 Configuration
 
-- **Application**: Node.js 18, Express
-- **CI/CD**: Jenkins
-- **Containerization**: Docker
-- **Registry**: Amazon ECR
-- **Orchestration**: Kubernetes (EKS)
-- **Infrastructure**: AWS CloudFormation
-- **CLI Tools**: kubectl, eksctl
+### Update for Your Environment
 
-## Account Details
+1. **AWS Account ID** - Update in `jenkins/Jenkinsfile`:
+   ```groovy
+   AWS_ACCOUNT_ID = 'YOUR_ACCOUNT_ID'
+   ```
 
-- **Account ID**: 047861165149
-- **Region**: eu-north-1
+2. **Region** - Update in all CloudFormation templates and Jenkinsfile:
+   ```yaml
+   AWS_REGION = 'your-region'
+   ```
+
+3. **Application Name** - Update in `app/server.js` if needed
+
+## 🧪 Testing
+
+After deployment, test your application:
+
+```powershell
+# Get Load Balancer URL
+kubectl get svc nodejs-app-service
+
+# Test endpoint
+curl http://YOUR-LOAD-BALANCER-URL
+```
+
+**Expected response:**
+```json
+{
+  "message": "Node.js App on EKS - Jenkins CI/CD by manju",
+  "version": "1.0.0",
+  "timestamp": "2025-12-01T09:21:04.489Z",
+  "environment": "production",
+  "pod": "nodejs-app-xxxxx"
+}
+```
+
+## 🔄 CI/CD Workflow
+
+1. Developer pushes code to GitHub
+2. GitHub webhook triggers Jenkins
+3. Jenkins builds Docker image
+4. Image pushed to Amazon ECR
+5. Jenkins deploys to EKS
+6. Kubernetes performs rolling update
+7. Application live with zero downtime
+
+**Total time: ~5 minutes from push to production**
+
+## 📊 Monitoring
+
+```powershell
+# View pods
+kubectl get pods
+
+# View logs
+kubectl logs -f deployment/nodejs-app
+
+# View service
+kubectl get svc nodejs-app-service
+
+# Describe deployment
+kubectl describe deployment nodejs-app
+```
+
+## 🛠️ Useful Commands
+
+```powershell
+# Scale application
+kubectl scale deployment nodejs-app --replicas=5
+
+# Rollback deployment
+kubectl rollout undo deployment/nodejs-app
+
+# Restart deployment
+kubectl rollout restart deployment/nodejs-app
+
+# View rollout status
+kubectl rollout status deployment/nodejs-app
+```
+
+## 🆘 Troubleshooting
+
+### Build Fails
+- Check Jenkins console output
+- Verify AWS credentials
+- Check ECR repository exists
+
+### Deployment Fails
+- Verify kubectl is configured: `kubectl get nodes`
+- Check pod status: `kubectl get pods`
+- View pod logs: `kubectl logs POD_NAME`
+
+### Application Not Accessible
+- Wait 2-3 minutes for DNS propagation
+- Check service: `kubectl get svc`
+- Verify Load Balancer is active in AWS Console
+
+**See DEPLOYMENT-GUIDE.md for detailed troubleshooting.**
+
+## 🧹 Cleanup
+
+To delete all resources:
+
+```powershell
+# Delete EKS cluster
+eksctl delete cluster --name nodejs-eks-cluster --region eu-north-1
+
+# Delete CloudFormation stacks
+aws cloudformation delete-stack --stack-name jenkins-eks --region eu-north-1
+aws cloudformation delete-stack --stack-name eks-ecr --region eu-north-1
+aws cloudformation delete-stack --stack-name eks-nodegroup --region eu-north-1
+aws cloudformation delete-stack --stack-name eks-cluster --region eu-north-1
+aws cloudformation delete-stack --stack-name eks-vpc --region eu-north-1
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📝 License
+
+This project is provided as-is for educational and demonstration purposes.
+
+## 👥 Team Usage
+
+This repository is designed to be cloned and deployed by your team:
+
+1. **Clone** the repository
+2. **Update** AWS account ID and region in configuration files
+3. **Deploy** using the provided scripts
+4. **Customize** the application as needed
+5. **Push** changes to trigger automatic deployments
+
+**Your team can have this running in under 30 minutes!**
+
+---
+
+**Built with ❤️ for production-grade Kubernetes deployments**
